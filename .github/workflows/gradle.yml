@@ -65,7 +65,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          username: ec2-user
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
