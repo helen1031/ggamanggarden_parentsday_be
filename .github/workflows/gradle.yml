@@ -68,7 +68,8 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
             sudo docker stop $(sudo docker ps -q) || true
-            sudo docker run --name ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
-            sudo docker system prune -a -f
+            docker rm $(docker ps -a -q) 
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
+            sudo docker run --name ggamanggarden-parentsday --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
+    
