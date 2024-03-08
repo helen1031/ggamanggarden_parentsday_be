@@ -21,6 +21,19 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    # Modify properties file
+    - name: modify properties file
+      run: |
+        sed -i "s|spring.profiles.active=local|spring.profiles.active=prod|" ./src/main/resources/application.properties
+
+    # Modify properties-prod file 
+    - name: modify properties-prod file
+      run: |
+        sed -i "s|#spring.datasource.username=|spring.datasource.username=${{ secrets.DB_USERNAME }}|" ./src/main/resources/application-prod.properties
+        sed -i "s|#spring.datasource.password=|spring.datasource.password=${{ secrets.DB_PASSWORD }}|" ./src/main/resources/application-prod.properties
+        sed -i "s|#coolsms.api.key=|coolsms.api.key=${{ secrets.COOLSMS_KEY }}|" ./src/main/resources/application-prod.properties
+        sed -i "s|#coolsms.api.secret=|coolsms.api.secret=${{ secrets.COOLSMS_SECRET }}|" ./src/main/resources/application-prod.properties
+          
     # Configure and setup Gradle
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3.1.0
