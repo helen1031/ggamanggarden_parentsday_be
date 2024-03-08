@@ -22,12 +22,12 @@ jobs:
         distribution: 'temurin'
 
     # Modify properties file
-    - name: modify properties file
+    - name: Modify properties file
       run: |
         sed -i "s|spring.profiles.active=local|spring.profiles.active=prod|" ./src/main/resources/application.properties
 
     # Modify properties-prod file 
-    - name: modify properties-prod file
+    - name: Modify properties-prod file
       run: |
         sed -i "s|#spring.datasource.username=|spring.datasource.username=${{ secrets.DB_USERNAME }}|" ./src/main/resources/application-prod.properties
         sed -i "s|#spring.datasource.password=|spring.datasource.password=${{ secrets.DB_PASSWORD }}|" ./src/main/resources/application-prod.properties
@@ -59,20 +59,16 @@ jobs:
 
   run-docker-image-on-ec2:
     needs: build-and-push-docker-image
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      # Pull the latest image
-      - name: Pull latest Docker image
-        run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
-
-      # Stop existing container
-      - name: Stop existing Docker container
-        run: sudo docker stop $(sudo docker ps -q) || true
-
-      # Run new container
-      - name: Run new Docker container
-        run: sudo docker run --name ggamanggarden-parentsday --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
-
-      # Cleanup unused Docker images
-      - name: Clean up old Docker images
-        run: sudo docker system prune -a -f
+      - name: Executing remote SSH commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ec2-user
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
+            sudo docker stop $(sudo docker ps -q) || true
+            sudo docker run --name ggamanggarden-parentsday --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/ggamanggarden-parentsday
+            sudo docker system prune -a -f
