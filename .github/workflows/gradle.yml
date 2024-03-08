@@ -46,7 +46,7 @@ jobs:
 
   run-docker-image-on-ec2:
     needs: build-and-push-docker-image
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest
     steps:
       # Pull the latest image
       - name: Pull latest Docker image
