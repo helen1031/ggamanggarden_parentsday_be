@@ -107,7 +107,7 @@ public class OrderController {
             /**
              * 문자 발송 로직
              */
-            smsService.sendSMS(orderDTO.getPhone(), messageTextBuilder.toString());
+            //smsService.sendSMS(orderDTO.getPhone(), messageTextBuilder.toString());
 
             return ResponseEntity.ok().body(dto);
 
