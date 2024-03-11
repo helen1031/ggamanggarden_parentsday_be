@@ -1,12 +1,16 @@
 package ggamanggarden.parentsday.orders.service;
 
+import ggamanggarden.parentsday.orders.dto.OrderDTO;
+import ggamanggarden.parentsday.orders.dto.OrderDetailDTO;
 import ggamanggarden.parentsday.orders.entity.OrderDetailEntity;
 import ggamanggarden.parentsday.orders.entity.OrderEntity;
 import ggamanggarden.parentsday.orders.repository.OrderDetailRepository;
 import ggamanggarden.parentsday.orders.repository.OrderRepository;
+import ggamanggarden.parentsday.product.entity.ProductEntity;
 import ggamanggarden.parentsday.product.repository.ProductRepository;
 import ggamanggarden.parentsday.security.EncryptionUtil;
 import ggamanggarden.parentsday.sms.SMSService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,11 +18,13 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class OrderService {
-
     @Autowired
     private OrderRepository orderRepository;
 
@@ -42,6 +48,10 @@ public class OrderService {
         return orderRepository.findByOid(orderEntity.getOid());
     }
 
+    public OrderEntity findOrderByOid(final Long oid) {
+        return orderRepository.findByOid(oid);
+    }
+
     // 2. 주문 내역 조회
     public List<OrderDetailEntity> findOrderDetailsByCustomerInfo(String cname, String phone) throws Exception {
         List<OrderEntity> orders = orderRepository.findAllByCnameAndPhone(EncryptionUtil.encrypt(cname),
@@ -52,6 +62,10 @@ public class OrderService {
             orderDetails.addAll(details);
         }
         return orderDetails;
+    }
+
+    public List<OrderDetailEntity> findOrderDetailsByOid(Long oid) {
+        return orderDetailRepository.findAllByOid(oid);
     }
 
     // 3. 수령 여부 체크
@@ -68,6 +82,17 @@ public class OrderService {
         orderDetailRepository.save(orderDetail);
 
         return orderDetail;
+    }
+
+    // 4. 주문 내역 삭제
+    public void deleteOrder(Long oid) {
+        OrderEntity existingOrder = orderRepository.findByOid(oid);
+        if(existingOrder == null) {
+            throw new RuntimeException("Order not found");
+        }
+
+        orderRepository.delete(existingOrder);
+        log.info("Entity OID : {} is deleted.", oid);
     }
 
 }

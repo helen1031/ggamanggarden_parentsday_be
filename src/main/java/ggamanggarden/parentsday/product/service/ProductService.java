@@ -44,4 +44,18 @@ public class ProductService {
         return false;
     }
 
+    public void adjustStock(Long pid, int quantity) {
+        ProductEntity product = retrieveOne(pid);
+        int updatedStock = product.getStock() + quantity;
+
+        if (updatedStock < 0) {
+            log.warn("Stock cannot be negative. PID: {}, Requested Adjustment: {}", pid, quantity);
+            throw new RuntimeException("Stock cannot be negative");
+        }
+
+        product.setStock(updatedStock);
+        productRepository.save(product);
+        log.info("Stock adjusted for PID: {}. New Stock: {}", pid, updatedStock);
+    }
+
 }

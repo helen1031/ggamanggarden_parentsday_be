@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -26,5 +27,25 @@ public class OrderDetailService {
         log.info("Entity ID(detail): {} is saved.", entity.getId());
 
         return orderDetailRepository.findAllByOid(entity.getId().getOid());
+    }
+
+    public List<OrderDetailEntity> findOrderDetailsByOid(Long oid) {
+        if (oid == null) {
+            log.warn("Order ID cannot be null.");
+            throw new RuntimeException("Order ID cannot be null");
+        }
+
+        List<OrderDetailEntity> orderDetails = orderDetailRepository.findAllByOid(oid);
+        if (orderDetails == null || orderDetails.isEmpty()) {
+            log.info("No order details found for OID: {}", oid);
+            return new ArrayList<>();
+        }
+
+        log.info("Retrieved {} order details for OID: {}", orderDetails.size(), oid);
+        return orderDetails;
+    }
+
+    public void deleteDetails(OrderDetailEntity detail) {
+        orderDetailRepository.delete(detail);
     }
 }

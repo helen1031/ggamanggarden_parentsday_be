@@ -10,16 +10,14 @@ import ggamanggarden.parentsday.orders.service.OrderDetailService;
 import ggamanggarden.parentsday.orders.service.OrderService;
 import ggamanggarden.parentsday.product.entity.ProductEntity;
 import ggamanggarden.parentsday.product.service.ProductService;
+import ggamanggarden.parentsday.security.EncryptionUtil;
 import ggamanggarden.parentsday.sms.SMSService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +105,7 @@ public class OrderController {
             /**
              * 문자 발송 로직
              */
-            //smsService.sendSMS(orderDTO.getPhone(), messageTextBuilder.toString());
+            smsService.sendSMS(orderDTO.getPhone(), messageTextBuilder.toString());
 
             return ResponseEntity.ok().body(dto);
 
@@ -115,6 +113,37 @@ public class OrderController {
             String error = e.getMessage();
             ResponseDTO<List<OrderDTO>> response = ResponseDTO.<List<OrderDTO>>builder().error(error).build();
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/{oid}")
+    public ResponseEntity<?> getOrderDetailsByOid(@PathVariable Long oid) {
+        try {
+            List<OrderDetailEntity> orderDetails = orderService.findOrderDetailsByOid(oid);
+
+            // Decrypting the sensitive fields
+            for (OrderDetailEntity orderDetail : orderDetails) {
+                OrderEntity order = orderDetail.getOrder();
+                try {
+                    String dCname = EncryptionUtil.decrypt(order.getCname());
+                    String dPhone = EncryptionUtil.decrypt(order.getPhone());
+
+                    if (dCname != null && !dCname.isEmpty() && dPhone != null && !dPhone.isEmpty()) {
+                        order.setCname(dCname);
+                        order.setPhone(dPhone);
+                    } else {
+                        log.error("Decryption resulted in invalid data.");
+                    }
+
+                } catch (Exception e) {
+                    log.error("Decryption error: {}", e.getMessage());
+                }
+            }
+            return ResponseEntity.ok(orderDetails);
+        } catch (Exception e) {
+            String error = e.getMessage();
+            log.error("Error fetching order details for OID {}: {}", oid, error);
+            return ResponseEntity.internalServerError().body("Error fetching order details");
         }
     }
 
@@ -129,6 +158,24 @@ public class OrderController {
         try {
             OrderDetailEntity updatedOrderDetail = orderService.receiveOrder(orderReceiveDTO.getOid(), orderReceiveDTO.getPid(), orderReceiveDTO.getColor());
             return ResponseEntity.ok(updatedOrderDetail);
+        } catch (Exception e) {
+            String error = e.getMessage();
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @Transactional
+    @DeleteMapping("/delete-order")
+    public ResponseEntity<?> deleteOrder(@RequestParam Long oid) {
+        try {
+            List<OrderDetailEntity> existingDetails = orderDetailService.findOrderDetailsByOid(oid);
+            existingDetails.forEach(detail -> {
+                productService.adjustStock(detail.getProduct().getPid(), detail.getQuantity());
+                orderDetailService.deleteDetails(detail); // Assuming you have a delete method in your orderDetailService
+            });
+            orderService.deleteOrder(oid);
+
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             String error = e.getMessage();
             return ResponseEntity.badRequest().body(error);
