@@ -99,7 +99,7 @@ public class OrderController {
                     .build();
 
 
-            messageTextBuilder.append("\n※ 생화 특성 상 주문 취소 및 환불 요청은 수령일로부터 7일 이전까지 가능합니다.\n")
+            messageTextBuilder.append("\n※ 꽃 시장 수급현황에 따라 꽃 종류가 변경될 수 있으며, 생화 특성 상 시장 주문 취소 및 환불 요청은 수령일로부터 7일 이전까지 가능합니다.\n")
                     .append("※ 주문 취소 시, 결제하신 총 금액 중 \"예약 이벤트로 제공된 선물 금액(5,000원)을 제외\"하고 환불해드리니 이 점 유의 부탁드리겠습니다.");
 
             /**
