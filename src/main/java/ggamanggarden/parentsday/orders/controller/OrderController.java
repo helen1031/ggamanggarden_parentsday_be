@@ -45,10 +45,10 @@ public class OrderController {
         try {
             List<OrderDetailDTO> successfulOrderDetails = new ArrayList<>();
             StringBuilder messageTextBuilder = new StringBuilder();
-            messageTextBuilder.append("까망네정원 상품을 구매해주셔서 감사합니다!\n")
+            messageTextBuilder.append("까망네꽃집 상품을 구매해주셔서 감사합니다!\n")
                     .append("수령일은 5월 ")
                     .append(orderDTO.getWantDate())
-                    .append("일이고, 수령장소는 '경상북도 김천시 대항면 대성향천길 1569-28(직지초등학교 근처)' 입니다.\n\n")
+                    .append("일이고, 수령장소는 '까망네꽃집(대치동 911-13)' 입니다.\n\n")
                     .append("주문 정보는 아래와 같습니다.\n");
 
             // Verify stock for each item and collect those that can be successfully ordered
@@ -99,8 +99,7 @@ public class OrderController {
                     .build();
 
 
-            messageTextBuilder.append("\n※ 꽃 시장 수급현황에 따라 꽃 종류가 변경될 수 있으며, 생화 특성 상 시장 주문 취소 및 환불 요청은 수령일로부터 7일 이전까지 가능합니다.\n")
-                    .append("※ 주문 취소 시, 결제하신 총 금액 중 \"예약 이벤트로 제공된 선물 금액(5,000원)을 제외\"하고 환불해드리니 이 점 유의 부탁드리겠습니다.");
+            messageTextBuilder.append("\n※ 꽃 시장 수급현황에 따라 꽃 종류가 변경될 수 있으며, 생화 특성 상 시장 주문 취소 및 환불 요청은 수령일로부터 7일 이전까지 가능합니다.\n");
 
             /**
              * 문자 발송 로직
